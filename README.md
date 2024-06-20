@@ -7,3 +7,14 @@ scripts:
 "logs:prod": "fly logs"  
 
 npm run [script]
+
+when same origin the address can just be **'/api/persons'**  
+then frontend development doesn't work without vite.config.js:  
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+      },
+    }
+  },
