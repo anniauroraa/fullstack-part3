@@ -8,7 +8,7 @@ scripts:
 
 npm run [script]
 
-when same origin the address can just be **'/api/persons'**  
+when same origin the address in frontend Services.jsx can just be **'/api/persons'**  
 then frontend development doesn't work without vite.config.js:  
   server: {
     proxy: {
