@@ -1,39 +1,46 @@
 const express = require('express')
 const morgan = require('morgan')
-const cors = require('cors')
+
+// This will allow us to use process.env.MONGO_URI in our scripts
+require('dotenv').config()
 
 const app = express()
-
-app.use(cors())
-app.use(morgan('tiny'))
 app.use(express.json())
 app.use(express.static('dist'))
 
-app.listen(3000, () => {
-  console.log('Server is running on port 3001');
+const Entry = require('./models/entry')
+
+const cors = require('cors')
+app.use(cors())
+app.use(morgan('tiny'))
+
+const PORT = process.env.PORT
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
 
+
 let persons = [
-    { 
-      "id": 1,
-      "name": "Arto Hellas", 
-      "number": "040-123456"
-    },
-    { 
-      "id": 2,
-      "name": "Ada Lovelace", 
-      "number": "39-44-5323523"
-    },
-    { 
-      "id": 3,
-      "name": "Dan Abramov", 
-      "number": "12-43-234345"
-    },
-    { 
-      "id": 4,
-      "name": "Mary Poppendieck", 
-      "number": "39-23-6423122"
-    }
+    // { 
+    //   "id": 1,
+    //   "name": "Arto Hellas", 
+    //   "number": "040-123456"
+    // },
+    // { 
+    //   "id": 2,
+    //   "name": "Ada Lovelace", 
+    //   "number": "39-44-5323523"
+    // },
+    // { 
+    //   "id": 3,
+    //   "name": "Dan Abramov", 
+    //   "number": "12-43-234345"
+    // },
+    // { 
+    //   "id": 4,
+    //   "name": "Mary Poppendieck", 
+    //   "number": "39-23-6423122"
+    // }
 ]
 
 app.get('/', (request, response) => {
@@ -41,7 +48,9 @@ app.get('/', (request, response) => {
 })
 
 app.get('/api/persons', (request, response) => {
-  response.json(persons)
+  Entry.find({}).then(entries => {
+    response.json(entries) 
+  })
 })
 
 app.get('/api/persons/:id', (request, response) => {
@@ -103,7 +112,3 @@ app.post('/api/persons', (request, response) => {
   response.set('Content-Type', 'application/json')
   response.json(person)
 })
-
-const PORT = 3001
-app.listen(PORT)
-console.log(`Server running on port ${PORT}`)
