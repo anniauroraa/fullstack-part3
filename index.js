@@ -21,26 +21,6 @@ app.listen(PORT, () => {
 
 
 let persons = [
-    // { 
-    //   "id": 1,
-    //   "name": "Arto Hellas", 
-    //   "number": "040-123456"
-    // },
-    // { 
-    //   "id": 2,
-    //   "name": "Ada Lovelace", 
-    //   "number": "39-44-5323523"
-    // },
-    // { 
-    //   "id": 3,
-    //   "name": "Dan Abramov", 
-    //   "number": "12-43-234345"
-    // },
-    // { 
-    //   "id": 4,
-    //   "name": "Mary Poppendieck", 
-    //   "number": "39-23-6423122"
-    // }
 ]
 
 app.get('/', (request, response) => {
@@ -54,30 +34,24 @@ app.get('/api/persons', (request, response) => {
 })
 
 app.get('/api/persons/:id', (request, response) => {
-  const id = Number(request.params.id)
-  const person = persons.find(person => {
-    console.log(person.id, typeof person.id, id, typeof id, person.id === id)
-    return person.id === id
+  const id = request.params.id
+    Entry.findById(id).then(entry => {
+      console.log(entry.id, typeof entry.id, id, typeof id, entry.id === id)
+      response.json(entry)
   })
-
-  if (!person) {
-    console.log("person not found")
-    response.status(404).end()
-  }
-
-  console.log(person)
-  response.json(person)
 })
 
 app.get('/info', (request, response) => {
-    response.send(`<p>Phonebook has info for ${persons.length} people</p><p>${new Date()}</p>`)
+    Entry.find({}).then(entries => {
+      response.send(`<p>Phonebook has info for ${entries.length} people</p><p>${new Date()}</p>`)
     })
-
-app.delete('/api/persons/:id', (request, response) => {
-  const id = Number(request.params.id)
-  persons = persons.filter(person => person.id !== id)
-  response.status(204).end()
 })
+
+// app.delete('/api/persons/:id', (request, response) => {
+//   const id = Number(request.params.id)
+//   persons = persons.filter(person => person.id !== id)
+//   response.status(204).end()
+// })
 
 const generateId = () => {
   const randomId = Math.floor(Math.random() * 1000000)
@@ -93,22 +67,31 @@ app.post('/api/persons', (request, response) => {
     })
   }
 
-  if (persons.find(person => person.name === body.name)) {
-    return response.status(400).json({ 
-      error: 'name must be unique' 
-    })
-  }
-
-  const person = {
+  const entry = new Entry({
     name: body.name,
-    number: body.number,
-    id: generateId(),
-  }
+    number: body.number
+  })
 
-  persons = persons.concat(person)
+  entry.save().then(savedEntry => {
+    response.json(savedEntry)
+  })
 
-  console.log("POST", body.name, body.number)
+  // if (persons.find(person => person.name === body.name)) {
+  //   return response.status(400).json({ 
+  //     error: 'name must be unique' 
+  //   })
+  // }
 
-  response.set('Content-Type', 'application/json')
-  response.json(person)
+  // const person = {
+  //   name: body.name,
+  //   number: body.number,
+  //   id: generateId(),
+  // }
+
+  // persons = persons.concat(person)
+
+  // console.log("POST", body.name, body.number)
+
+  // response.set('Content-Type', 'application/json')
+  // response.json(person)
 })
