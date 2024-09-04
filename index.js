@@ -1,24 +1,38 @@
-const express = require('express')
-const morgan = require('morgan')
-
 // This will allow us to use process.env.MONGO_URI in our scripts
-require('dotenv').config()
+require('dotenv').config({path: './.env'})
+console.log(`is it undefined????? == ` + process.env.MONGODB_URI)
 
+const express = require('express')
 const app = express()
-app.use(express.json())
-app.use(express.static('dist'))
 
 const Entry = require('./models/entry')
 
+// this first
+app.use(express.static('dist'))
+
 const cors = require('cors')
 app.use(cors())
+
+// this second
+app.use(express.json())
+
+// This is a request logger middleware
+const morgan = require('morgan')
 app.use(morgan('tiny'))
 
-const PORT = process.env.PORT
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message)
 
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
+  } 
+
+  next(error)
+}
+
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({ error: 'unknown endpoint' })
+}
 
 let persons = [
 ]
@@ -33,12 +47,22 @@ app.get('/api/persons', (request, response) => {
   })
 })
 
-app.get('/api/persons/:id', (request, response) => {
+app.get('/api/persons/:id', (request, response, next) => {
   const id = request.params.id
-    Entry.findById(id).then(entry => {
-      console.log(entry.id, typeof entry.id, id, typeof id, entry.id === id)
-      response.json(entry)
-  })
+    Entry.findById(id)
+      .then(entry => {
+        if (entry) {
+          console.log(entry.id, typeof entry.id, id, typeof id, entry.id === id)
+          response.json(entry)
+        } else {
+          response.status(404).end()
+        } 
+      })
+      .catch(error => next(error))
+      // {
+      //   console.log(error)
+      //   response.status(400).send({ error: 'malformatted id' })	
+      // })
 })
 
 app.get('/info', (request, response) => {
@@ -52,6 +76,14 @@ app.get('/info', (request, response) => {
 //   persons = persons.filter(person => person.id !== id)
 //   response.status(204).end()
 // })
+
+app.delete('/api/notes/:id', (request, response, next) => {
+  Note.findByIdAndDelete(request.params.id)
+    .then(result => {
+      response.status(204).end()
+    })
+    .catch(error => next(error))
+})
 
 const generateId = () => {
   const randomId = Math.floor(Math.random() * 1000000)
@@ -75,7 +107,7 @@ app.post('/api/persons', (request, response) => {
   entry.save().then(savedEntry => {
     response.json(savedEntry)
   })
-
+})
   // if (persons.find(person => person.name === body.name)) {
   //   return response.status(400).json({ 
   //     error: 'name must be unique' 
@@ -94,4 +126,16 @@ app.post('/api/persons', (request, response) => {
 
   // response.set('Content-Type', 'application/json')
   // response.json(person)
-})
+
+
+  
+  // unknownEndpoint must be second to last middleware
+  app.use(unknownEndpoint)
+  
+  // this has to be the last loaded middleware, also all the routes should be registered before this!
+  app.use(errorHandler)
+
+  const PORT = process.env.PORT
+  app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`)
+  })
