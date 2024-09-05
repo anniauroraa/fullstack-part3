@@ -59,10 +59,6 @@ app.get('/api/persons/:id', (request, response, next) => {
         } 
       })
       .catch(error => next(error))
-      // {
-      //   console.log(error)
-      //   response.status(400).send({ error: 'malformatted id' })	
-      // })
 })
 
 app.get('/info', (request, response) => {
@@ -98,6 +94,33 @@ app.post('/api/persons', (request, response) => {
   })
 })
 
+app.put('/api/persons/:id', (request, response, next) => {
+  const body = request.body
+  
+  const newEntry = {
+    name: body.name,
+    number: body.number
+  }
+
+  
+  const entryName = Entry.findById(request.params.id)
+    .then(entry => {
+      console.log("entry.name == " + entry.name)
+
+      if (newEntry.name === entry.name) {
+        console.log("updating number for existing name")
+    
+        Entry.findByIdAndUpdate(request.params.id, newEntry, { new: true })
+          .then(updatedEntry => {
+            response.json(updatedEntry)
+          })
+          .catch(error => next(error))
+    
+          console.log("updated number")    
+      }
+    })
+  })
+
   // response.set('Content-Type', 'application/json')
   
   // unknownEndpoint must be second to last middleware
@@ -109,4 +132,4 @@ app.post('/api/persons', (request, response) => {
   const PORT = process.env.PORT
   app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`)
-  })
+})
