@@ -71,24 +71,13 @@ app.get('/info', (request, response) => {
     })
 })
 
-// app.delete('/api/persons/:id', (request, response) => {
-//   const id = Number(request.params.id)
-//   persons = persons.filter(person => person.id !== id)
-//   response.status(204).end()
-// })
-
-app.delete('/api/notes/:id', (request, response, next) => {
-  Note.findByIdAndDelete(request.params.id)
+app.delete('/api/persons/:id', (request, response, next) => {
+  Entry.findByIdAndDelete(request.params.id)
     .then(result => {
       response.status(204).end()
     })
     .catch(error => next(error))
 })
-
-const generateId = () => {
-  const randomId = Math.floor(Math.random() * 1000000)
-  return randomId
-}
 
 app.post('/api/persons', (request, response) => {
   const body = request.body
@@ -108,26 +97,8 @@ app.post('/api/persons', (request, response) => {
     response.json(savedEntry)
   })
 })
-  // if (persons.find(person => person.name === body.name)) {
-  //   return response.status(400).json({ 
-  //     error: 'name must be unique' 
-  //   })
-  // }
-
-  // const person = {
-  //   name: body.name,
-  //   number: body.number,
-  //   id: generateId(),
-  // }
-
-  // persons = persons.concat(person)
-
-  // console.log("POST", body.name, body.number)
 
   // response.set('Content-Type', 'application/json')
-  // response.json(person)
-
-
   
   // unknownEndpoint must be second to last middleware
   app.use(unknownEndpoint)
