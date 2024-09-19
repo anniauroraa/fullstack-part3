@@ -10,7 +10,8 @@
     "build:ui": "@powershell Remove-Item -Recurse -Force dist && cd ../fullstack/part2/phonebook && npm run build && @powershell Copy-Item dist -Recurse ../../../fullstack-part3",
     "deploy": "fly deploy",
     "deploy:full": "npm run build:ui && npm run deploy",
-    "logs:prod": "fly logs"
+    "logs:prod": "fly logs",
+    "lint": "eslint ."
   },
   "author": "Anni Virtanen",
   "license": "MIT",
@@ -23,7 +24,11 @@
     "morgan": "^1.10.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9.10.0",
     "@flydotio/dockerfile": "^0.5.7",
+    "@stylistic/eslint-plugin-js": "^2.8.0",
+    "eslint": "^9.10.0",
+    "globals": "^15.9.0",
     "nodemon": "^3.1.0"
   }
 }

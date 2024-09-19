@@ -20,17 +20,17 @@ const entrySchema = new mongoose.Schema({
 
 const Entry = mongoose.model('Entry', entrySchema)
 
-if (process.argv.length == 3) {
+if (process.argv.length === 3) {
   console.log('phonebook:')
   Entry
     .find({})
     .then(persons => {
       persons.forEach(entry => {
         console.log(entry.name + ' ' + entry.number)
-      mongoose.connection.close()
-  })
-  process.exit(1)
-})
+        mongoose.connection.close()
+      })
+      process.exit(1)
+    })
 }
 else if (process.argv.length < 5) {
   console.log('Please provide the password, name and number as arguments: node mongo.js <password> <name> <number>')
